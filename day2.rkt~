@@ -7,11 +7,6 @@
          data/monad
          data/applicative)
 
-(define ls-test
-    '("1-3 a: abcde"
-      "1-3 b: cdefg"
-      "2-9 c: ccccccccc"))
-
 (define input-file
   "/home/ebresafegaga/repos/adventofcode/day2.txt")
 
@@ -23,10 +18,11 @@
 
 (define (valid? input)
   (match-let* ([(line (range low up) char str) input]
-               [chars (filter (λ (c) (eq? c char)) str)]
+               [chars (filter (λ (c) (eq? c char))
+                              str)]
                [len (length chars)])
     (and (<= len up)
-         (>= len low))))
+         (>= low len))))
 
 (define (split line)
   line)
@@ -40,30 +36,18 @@
     (char/p #\:)
     space/p
     [text <- (many/p any-char/p)]
-    eof/p
-    (pure (line (range lower upper)
+    (pure (line (range upper lower)
                 char
                 text))))
 
-(define (answer ls)
+(define (answer)
   (length
    (filter valid?
            (map (λ (line) (parse-result! (parse-string line/p
                                                        line)))
-                ls))))
+                (lines)))))
 
-(define (string->range line)
-  (parse-result!
-   (parse-string line/p
-                 line)))
 
-(struct some (value) #:transparent)
-(struct none () #:transparent)
-
-(define (char/parser c str)
-  (match (string->list str)
-    [(cons x xs) #:when (eq? c x) (some `(,x . ,(list->string xs)))]
-    [_ (none)]))
 
 
 
