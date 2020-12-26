@@ -1,4 +1,8 @@
-#lang racket 
+#lang racket/base
+
+(require racket/match
+         racket/file
+         rackunit)
 
 (define input-file
   "/home/ebresafegaga/repos/adventofcode/day1.txt")
@@ -11,7 +15,7 @@
     675
     1456))
 
-(define (answer/list numbers)
+(define (answer/list/2 numbers)
   (call/cc
    (λ (k)
      (for ([n numbers])
@@ -26,7 +30,7 @@
      (for ([n numbers])
        (for ([x (remove n numbers)])
          (for ([y (remove n (remove x numbers))])
-           (if (= 2020 (+ n x y))
+           (if (eq? 2020 (+ n x y))
                (k (* n x y))
                (void))))))))
 
@@ -37,10 +41,16 @@
       (for/list ([line (in-lines port)])
         (string->number line)))))
 
-(define (answer/file file)
-  (answer/list/3 (lines file)))
+(define (lines/2 file)
+  (map string->number
+       (file->lines file)))
 
-(define (main)
-  (answer/file input-file))
+(define (answer/file f file)
+  (f (lines file)))
 
+(define (main number)
+  (match number
+    [2 (answer/file answer/list/2 input-file)]
+    [3 (answer/file answer/list/3 input-file)]
+    [_ 0]))
 
