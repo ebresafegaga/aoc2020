@@ -20,6 +20,17 @@
              (k (* n x))
              (void)))))))
 
+(define (answer/list/3 numbers)
+  (call/cc
+   (λ (k)
+     (for ([n numbers])
+       (for ([x (remove n numbers)])
+         (for ([y (remove n (remove x numbers))])
+           (if (= 2020 (+ n x y))
+               (k (* n x y))
+               (void))))))))
+
+
 (define (lines file)
   (call-with-input-file file
     (λ (port)
@@ -27,10 +38,9 @@
         (string->number line)))))
 
 (define (answer/file file)
-  (answer/list (lines file)))
+  (answer/list/3 (lines file)))
 
 (define (main)
   (answer/file input-file))
-
 
 
