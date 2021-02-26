@@ -2,6 +2,7 @@
 
 (require racket/file
          racket/match
+         racket/function
          megaparsack
          megaparsack/text
          data/monad
@@ -21,33 +22,55 @@
 (define (lines)
   (file->lines input-file))
 
-(define (valid? input)
-  (match-let* ([(line (range low up) char str) input]
+(define (valid? pred input)
+  (match-let* ([(line (range low high) char str) input]
                [chars (filter (λ (c) (eq? c char)) str)]
                [len (length chars)])
-    (and (<= len up)
-         (>= len low))))
+     (pred low high char str len)))
+
+(define (1st-pred low high char str len)
+  (and (<= len high)
+       (>= len low)))
+
+(define (2nd-pred low high char str len)
+  (let* ([l (list-ref str (sub1 low))]
+         [h (list-ref str (sub1 high))])
+    (cond
+      [(and (eq? l char)
+            (not (eq? h char)))
+       #t]
+      [(and (eq? h char)
+            (not (eq? l char)))
+       #t]
+      [else #f])))
 
 (define (split line)
   line)
 
 (define line/p
-  (do [lower <- integer/p]
+  (do (lower <- integer/p)
     (char/p #\-)
-    [upper <- integer/p]
+    (upper <- integer/p)
     space/p
-    [char <- any-char/p]
+    (char <- any-char/p)
     (char/p #\:)
     space/p
-    [text <- (many/p any-char/p)]
+    (text <- (many/p any-char/p))
     eof/p
     (pure (line (range lower upper)
                 char
                 text))))
 
-(define (answer ls)
+(define (answer/1 ls)
   (length
-   (filter valid?
+   (filter (curry valid? 1st-pred)
+           (map (λ (line) (parse-result! (parse-string line/p
+                                                       line)))
+                ls))))
+
+(define (answer/2 ls)
+  (length
+   (filter (curry valid? 2nd-pred)
            (map (λ (line) (parse-result! (parse-string line/p
                                                        line)))
                 ls))))
@@ -57,14 +80,5 @@
    (parse-string line/p
                  line)))
 
-(struct some (value) #:transparent)
-(struct none () #:transparent)
-
-(define (char/parser c str)
-  (match (string->list str)
-    [(cons x xs) #:when (eq? c x) (some `(,x . ,(list->string xs)))]
-    [_ (none)]))
-
-
-
-
+(printf "Part 1: ~a \n" (answer/1 (lines)))
+(printf "Part 2: ~a \n" (answer/2 (lines)))

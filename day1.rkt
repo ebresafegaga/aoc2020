@@ -1,8 +1,7 @@
 #lang racket/base
 
 (require racket/match
-         racket/file
-         rackunit)
+         racket/file)
 
 (define input-file
   "/home/ebresafegaga/repos/adventofcode/day1.txt")
@@ -54,3 +53,5 @@
     [3 (answer/file answer/list/3 input-file)]
     [_ 0]))
 
+(printf "Part 1: ~a \n" (main 2))
+(printf "Part 2: ~a \n" (main 3))
