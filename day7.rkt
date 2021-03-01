@@ -88,5 +88,3 @@
 (count (λ (x) x)
        (map (λ (rule) (can-hold-bag b h* rule)) h))
 (count-bags b h*)
-
-
